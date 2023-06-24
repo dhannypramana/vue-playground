@@ -18,17 +18,18 @@
           Activity List
         </div>
         <ul class="list-group list-group-flush">
-          <li class="list-group-item d-flex align-items-center justify-content-between" v-for="sa in state.activities"
-              :key="sa.id">
+          <li class="list-group-item d-flex align-items-center justify-content-between"
+              v-for="activity in state.activities"
+              :key="activity.id">
             <div class="data-wrapper">
-              {{ sa.title }}
+              {{ activity.title }}
             </div>
 
             <div class="btn-wrapper">
-              <button type="button" class="btn" @click.prevent="handleDeleteActivity(sa.id)">
+              <button type="button" class="btn" @click.prevent="handleDeleteActivity(activity.id)">
                 <IconTrash/>
               </button>
-              <button type="button" class="btn" @click.prevent="handleUpdateActivity(sa.id)">
+              <button type="button" class="btn" @click.prevent="handleUpdateActivity(activity.id)">
                 <IconPencil/>
               </button>
             </div>
@@ -45,7 +46,6 @@ import IconPencil from "@/components/icons/IconPencil.vue"
 import {useSwal} from "@/use/useSwal"
 import {onMounted, reactive} from "vue";
 import {useApi} from "@/use/useApi";
-import Swal from "sweetalert2";
 
 const {Toast, Modal} = useSwal()
 const {API} = useApi()
@@ -56,11 +56,14 @@ const state = reactive({
 })
 
 const setData = () => {
-  API.path('/activities').get().then((response) => {
-    state.activities = response.data
-  }).catch((e) => {
-    Toast.Error(e.message)
-  })
+  API.path('/activities')
+      .get()
+      .then((response) => {
+        state.activities = response.data
+      })
+      .catch((e) => {
+        Toast.Error(e.message)
+      })
 }
 
 onMounted(setData)
@@ -76,77 +79,86 @@ const handleAddActivity = async () => {
       title: state.activity
     }
 
-    API.path('/activities').post(newActivity).then(() => {
-      state.activities = [...state.activities, newActivity]
-      state.activity = ''
+    API.path('/activities')
+        .post(newActivity)
+        .then(() => {
+          state.activities = [...state.activities, newActivity]
+          state.activity = ''
 
-      return Toast.Success('Added Successfully')
-    }).catch((e) => {
-      return Toast.Error(e.message)
-    })
+          return Toast.Success('Added Successfully')
+        })
+        .catch((e) => {
+          return Toast.Error(e.message)
+        })
   } catch (e) {
     return Toast.Error(e.message)
   }
 }
 
 const handleDeleteActivity = (id) => {
-  Modal.Confirm({
-    title: 'Are you sure?',
-    text: "You won't be able to revert this!",
-    icon: 'warning',
-    confirmButtonText: 'Yes, delete it!'
-  }).Fire().then(() => {
-    try {
-      const index = state.activities.findIndex((item) => item.id === id)
+  Modal
+      .Confirm({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+      })
+      .Fire()
+      .then(() => {
+        try {
+          const index = state.activities.findIndex((item) => item.id === id)
 
-      API.path('/activities/' + id).delete().then(() => {
-        state.activities.splice(index, 1)
-        Toast.Success('Deleted Successfully')
-      }).catch((e) => {
+          API.path('/activities')
+              .delete(id)
+              .then(() => {
+                state.activities.splice(index, 1)
+                Toast.Success('Deleted Successfully')
+              })
+              .catch((e) => {
+                return Toast.Error(e.message)
+              })
+        } catch (e) {
+          return Toast.Error(e.message)
+        }
+      })
+      .catch((e) => {
         return Toast.Error(e.message)
       })
-    } catch (e) {
-      return Toast.Error(e.message)
-    }
-  }).catch((e) => {
-    return Toast.Error(e.message)
-  })
 }
 
 const handleUpdateActivity = (id) => {
   const oldActivity = state.activities.find((item) => item.id === id)
 
-  try {
-    Swal.fire({
-      title: 'Update Activity',
-      input: 'text',
-      inputValue: oldActivity.title,
-      showCancelButton: true,
-      preConfirm: (inputValue) => {
-        if (inputValue === '') {
-          Swal.showValidationMessage('Field is Required')
+  Modal
+      .Custom({
+        title: 'Update Activity',
+        input: 'text',
+        inputValue: oldActivity.title,
+        showCancelButton: true,
+        preConfirm: (inputValue) => {
+          if (inputValue === '') {
+            Modal.validationMessage('Field is Required')
+          }
         }
-      }
-    }).then(result => {
-      if (result.isConfirmed) {
+      })
+      .Fire()
+      .then((res) => {
         const updatedActivity = {
           id: oldActivity.id,
-          title: result.value
+          title: res.value
         }
 
-        API.path('/activities/' + id).put(updatedActivity).then(() => {
-          const index = state.activities.findIndex((item) => item.id === id)
+        API
+            .path('/activities')
+            .put(oldActivity.id, updatedActivity)
+            .then(() => {
+              const index = state.activities.findIndex((item) => item.id === id)
 
-          state.activities[index] = updatedActivity
-          Toast.Success('Updated Successfully')
-        }).catch((e) => {
-          Toast.Error(e.message)
-        })
-      }
-    })
-  } catch (e) {
-    Toast.Error(e.message)
-  }
+              state.activities[index] = updatedActivity
+              Toast.Success('Updated Successfully')
+            })
+            .catch((e) => {
+              Toast.Error(e.message)
+            })
+      })
 }
 </script>
 

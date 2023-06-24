@@ -26,6 +26,12 @@ const router = createRouter({
       path: '/projects/todo-list',
       name: 'projects.todoList',
       component: () => import('../components/TodoListComponent.vue')
+    }
+
+    ,{
+      path: '/projects/notes',
+      name: 'projects.notes',
+      component: () => import('../components/NotesComponent.vue')
     },
 
     /**

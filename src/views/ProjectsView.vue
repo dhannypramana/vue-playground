@@ -16,6 +16,12 @@
           Todo List App
         </RouterLink>
       </li>
+      <li class="list-group-item">
+        <RouterLink
+            :to="{name: 'projects.notes'}">
+          Notes App
+        </RouterLink>
+      </li>
     </ul>
   </div>
 </template>

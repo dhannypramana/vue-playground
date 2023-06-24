@@ -31,9 +31,9 @@ export const useApi = () => {
                 })
             })
         },
-        put(data) {
+        put(id, data) {
             return new Promise((resolve, reject) => {
-                axios.put(this.url, data)
+                axios.put(this.url + '/' + id, data)
                     .then((res) => {
                         resolve(res)
                     }).catch((err) => {
@@ -43,9 +43,9 @@ export const useApi = () => {
                 })
             })
         },
-        delete() {
+        delete(id) {
             return new Promise((resolve, reject) => {
-                axios.delete(this.url)
+                axios.delete(this.url + '/' + id)
                     .then((res) => {
                         resolve(res)
                     }).catch((err) => {
